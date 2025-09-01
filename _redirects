@@ -1,0 +1,9 @@
+# Serve all files in the Build folder directly
+/Build/* /Build/:splat 200
+
+# Optional: Serve TemplateData directly too
+/TemplateData/* /TemplateData/:splat 200
+
+# Redirect everything else to index.html (for SPA routing)
+# Only do this if you want client-side routing
+/* /index.html 200

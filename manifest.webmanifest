@@ -3,7 +3,6 @@
     "short_name": "Ultra Rage",
     "start_url": "index.html",
     "display": "fullscreen",
-    "orientation": "landscape",
     "background_color": "#3C3D5C",
     "theme_color": "#000",
     "description": "Ultra Rage",

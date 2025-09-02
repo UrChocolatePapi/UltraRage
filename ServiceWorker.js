@@ -1,4 +1,4 @@
-const CACHE_VERSION = '1.3'; // Increment this on every update
+const CACHE_VERSION = '2.1'; // Incremented to 2.1
 const CACHE_NAME = `DefaultCompany-UltraRage-${CACHE_VERSION}`;
 const CONTENT_TO_CACHE = [
   "Build/web.loader.js",

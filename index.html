@@ -38,7 +38,7 @@
         align-items: center;
         justify-content: center;
       " aria-label="F">
-        <img src="TemplateData/fullscreen-button.png" alt="Fullscreen" style="width: 24px; height: 24px; filter: invert(1);">
+        <img src="TemplateData/fullscreen-button.png" alt="Fullscreen" style="width: 24px; height: 24px;">
       </button>
     <script>
       var canvas = document.querySelector("#unity-canvas");
@@ -132,6 +132,7 @@
                           return document.fullscreenElement === canvas || document.webkitFullscreenElement === canvas;
                         }
 
+
                         async function toggleFullscreen() {
                           if (!canvas) return;
                           if (isFullscreen()) {
@@ -141,7 +142,6 @@
                             } else if (document.webkitExitFullscreen) {
                               await document.webkitExitFullscreen();
                             }
-                            btn.textContent = "Toggle Fullscreen";
                           } else {
                             // Enter fullscreen
                             if (canvas.requestFullscreen) {
@@ -149,7 +149,6 @@
                             } else if (canvas.webkitRequestFullscreen) {
                               await canvas.webkitRequestFullscreen();
                             }
-                            btn.textContent = "Exit Fullscreen";
                             // Try to lock orientation to landscape
                             if (screen.orientation && screen.orientation.lock) {
                               try {
@@ -161,6 +160,7 @@
                               console.log("Orientation lock not supported on this browser");
                             }
                           }
+                          setFullscreenBtn(isFullscreen());
                         }
 
                         btn.addEventListener("click", toggleFullscreen);
@@ -170,11 +170,11 @@
                           if (isFull) {
                             btn.title = "Exit Fullscreen";
                             btn.querySelector('img').src = "TemplateData/fullscreen-button.png";
-                            btn.querySelector('img').style.filter = "invert(0)";
+                            btn.querySelector('img');
                           } else {
                             btn.title = "Enter Fullscreen";
                             btn.querySelector('img').src = "TemplateData/fullscreen-button.png";
-                            btn.querySelector('img').style.filter = "invert(1)";
+                            btn.querySelector('img');
                           }
                         }
 

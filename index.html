@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | Ultra Rage</title>
+    <title>Ultra Rage</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=1920 height=1980 tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -23,15 +23,25 @@
         <div id="unity-build-title">Ultra Rage</div>
       </div>
     </div>
+      <button id="fullscreenBtn" style="
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        padding: 10px;
+        border-radius: 10px;
+        background: #22222237;
+        border: none;
+        z-index: 9999;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      " aria-label="F">
+        <img src="TemplateData/fullscreen-button.png" alt="Fullscreen" style="width: 24px; height: 24px; filter: invert(1);">
+      </button>
     <script>
       var canvas = document.querySelector("#unity-canvas");
-
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
       function unityShowBanner(msg, type) {
         var warningBanner = document.querySelector("#unity-warning");
         function updateBannerVisibility() {
@@ -98,8 +108,8 @@
 
       } else {
         // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "1920px";
-        canvas.style.height = "1980px";
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
       }
 
       document.querySelector("#unity-loading-bar").style.display = "block";
@@ -115,10 +125,67 @@
                   unityInstance.SetFullscreen(1);
                 };
 
-              }).catch((message) => {
-                alert(message);
-              });
-            };
+                        const btn = document.getElementById("fullscreenBtn");
+                        const canvas = document.querySelector("#unity-canvas");
+
+                        function isFullscreen() {
+                          return document.fullscreenElement === canvas || document.webkitFullscreenElement === canvas;
+                        }
+
+                        async function toggleFullscreen() {
+                          if (!canvas) return;
+                          if (isFullscreen()) {
+                            // Exit fullscreen
+                            if (document.exitFullscreen) {
+                              await document.exitFullscreen();
+                            } else if (document.webkitExitFullscreen) {
+                              await document.webkitExitFullscreen();
+                            }
+                            btn.textContent = "Toggle Fullscreen";
+                          } else {
+                            // Enter fullscreen
+                            if (canvas.requestFullscreen) {
+                              await canvas.requestFullscreen();
+                            } else if (canvas.webkitRequestFullscreen) {
+                              await canvas.webkitRequestFullscreen();
+                            }
+                            btn.textContent = "Exit Fullscreen";
+                            // Try to lock orientation to landscape
+                            if (screen.orientation && screen.orientation.lock) {
+                              try {
+                                await screen.orientation.lock("landscape");
+                              } catch (err) {
+                                console.log("Orientation lock failed:", err);
+                              }
+                            } else {
+                              console.log("Orientation lock not supported on this browser");
+                            }
+                          }
+                        }
+
+                        btn.addEventListener("click", toggleFullscreen);
+
+                        // Update button text if user exits fullscreen via browser controls
+                        function setFullscreenBtn(isFull) {
+                          if (isFull) {
+                            btn.title = "Exit Fullscreen";
+                            btn.querySelector('img').src = "TemplateData/fullscreen-button.png";
+                            btn.querySelector('img').style.filter = "invert(0)";
+                          } else {
+                            btn.title = "Enter Fullscreen";
+                            btn.querySelector('img').src = "TemplateData/fullscreen-button.png";
+                            btn.querySelector('img').style.filter = "invert(1)";
+                          }
+                        }
+
+                        document.addEventListener("fullscreenchange", () => {
+                          setFullscreenBtn(isFullscreen());
+                        });
+                        document.addEventListener("webkitfullscreenchange", () => {
+                          setFullscreenBtn(isFullscreen());
+                        });
+          });
+      };
 
       document.body.appendChild(script);
 

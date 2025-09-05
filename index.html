@@ -1,194 +1,143 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Ultra Rage</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-  </head>
-  <body>
-    <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
-      <div id="unity-warning"> </div>
-      <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Ultra Rage</div>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Ultra Rage</title>
+  <link rel="shortcut icon" href="TemplateData/favicon.ico">
+  <link rel="stylesheet" href="TemplateData/style.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+
+<body>
+  <div id="unity-container">
+    <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+    <div id="unity-loading-bar">
+      <div id="unity-logo"></div>
+      <div id="unity-progress-bar-empty">
+        <div id="unity-progress-bar-full"></div>
       </div>
     </div>
-      <button id="fullscreenBtn" style="
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        padding: 10px;
-        border-radius: 10px;
-        background: #22222237;
-        border: none;
-        z-index: 9999;
-        cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      " aria-label="F">
-        <img src="TemplateData/fullscreen-button.png" alt="Fullscreen" style="width: 24px; height: 24px;">
-      </button>
-    <script>
-      var canvas = document.querySelector("#unity-canvas");
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
+    <div id="unity-warning"> </div>
+    <!-- Fullscreen & Rotate Button -->
+    <button id="fullscreen-rotate-btn" style="
+          position: fixed;
+          bottom: 16px;
+          left: 16px;
+          z-index: 1000;
+          width: 48px;
+          height: 48px;
+          border-radius: 24px;
+          border: none;
+          background: #32293d;
+          color: #968bab;
+          font-size: 24px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s;
+        " title="Fullscreen" aria-label="Fullscreen">
+        <!-- SVG icon for fullscreen -->
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#968bab" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;">
+          <path d="M4 4h6V2H2v8h2V4zM20 4h-6V2h8v8h-2V4zM4 20h6v2H2v-8h2v6zM20 20h-6v2h8v-8h-2v6z"/>
+        </svg>
+    </button>
+  </div>
+  <script>
+    window.addEventListener("load", function () {
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("ServiceWorker.js");
       }
+    });
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/UltraRage.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/UltraRage.data",
-        frameworkUrl: buildUrl + "/UltraRage.framework.js",
-        codeUrl: buildUrl + "/UltraRage.wasm",
+    var container = document.querySelector("#unity-container");
+    var canvas = document.querySelector("#unity-canvas");
+    var loadingBar = document.querySelector("#unity-loading-bar");
+    var progressBarFull = document.querySelector("#unity-progress-bar-full");
+    var warningBanner = document.querySelector("#unity-warning");
+
+    // Fullscreen & Rotate Button logic
+    var fsBtn = document.getElementById("fullscreen-rotate-btn");
+    fsBtn.addEventListener("click", function () {
+      // Request fullscreen
+      if (canvas.requestFullscreen) {
+        canvas.requestFullscreen();
+      } else if (canvas.webkitRequestFullscreen) {
+        canvas.webkitRequestFullscreen();
+      } else if (canvas.mozRequestFullScreen) {
+        canvas.mozRequestFullScreen();
+      } else if (canvas.msRequestFullscreen) {
+        canvas.msRequestFullscreen();
+      }
+      // Rotate to landscape if on mobile
+      if (screen.orientation && screen.orientation.lock) {
+        screen.orientation.lock("landscape").catch(function () { });
+      }
+      // Animate button rotation
+      fsBtn.style.transform = "rotate(90deg)";
+      setTimeout(function () { fsBtn.style.transform = ""; }, 600);
+    });
+
+    // Shows a temporary message banner/ribbon for a few seconds
+    function unityShowBanner(msg, type) {
+      function updateBannerVisibility() {
+        warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+      }
+      var div = document.createElement('div');
+      div.innerHTML = msg;
+      warningBanner.appendChild(div);
+      if (type == 'error') div.style = 'background: red; padding: 10px;';
+      else {
+        if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+        setTimeout(function () {
+          warningBanner.removeChild(div);
+          updateBannerVisibility();
+        }, 5000);
+      }
+      updateBannerVisibility();
+    }
+
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/unity UR.loader.js";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/unity UR.data",
+      frameworkUrl: buildUrl + "/unity UR.framework.js",
+        codeUrl: buildUrl + "/unity UR.wasm",
         streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
+        companyName: "Ransom Interactive",
         productName: "Ultra Rage",
-        productVersion: "1.1",
+        productVersion: "0.1.1 [preview]",
         showBanner: unityShowBanner,
       };
 
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      // Mobile device style: fill the whole browser client area with the game canvas:
+      var meta = document.createElement('meta');
+      meta.name = 'viewport';
+      meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+      document.getElementsByTagName('head')[0].appendChild(meta);
+    }
 
 
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
-      }
+    loadingBar.style.display = "block";
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = () => {
+      createUnityInstance(canvas, config, (progress) => {
+        progressBarFull.style.width = 100 * progress + "%";
+      }).then((unityInstance) => {
+        loadingBar.style.display = "none";
+      }).catch((message) => {
+        alert(message);
+      });
+    };
+    document.body.appendChild(script);
+  </script>
+</body>
 
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
-
-                        const btn = document.getElementById("fullscreenBtn");
-                        const canvas = document.querySelector("#unity-canvas");
-
-                        function isFullscreen() {
-                          return document.fullscreenElement === canvas || document.webkitFullscreenElement === canvas;
-                        }
-
-
-                        async function toggleFullscreen() {
-                          if (!canvas) return;
-                          if (isFullscreen()) {
-                            // Exit fullscreen
-                            if (document.exitFullscreen) {
-                              await document.exitFullscreen();
-                            } else if (document.webkitExitFullscreen) {
-                              await document.webkitExitFullscreen();
-                            }
-                          } else {
-                            // Enter fullscreen
-                            if (canvas.requestFullscreen) {
-                              await canvas.requestFullscreen();
-                            } else if (canvas.webkitRequestFullscreen) {
-                              await canvas.webkitRequestFullscreen();
-                            }
-                            // Try to lock orientation to landscape
-                            if (screen.orientation && screen.orientation.lock) {
-                              try {
-                                await screen.orientation.lock("landscape");
-                              } catch (err) {
-                                console.log("Orientation lock failed:", err);
-                              }
-                            } else {
-                              console.log("Orientation lock not supported on this browser");
-                            }
-                          }
-                          setFullscreenBtn(isFullscreen());
-                        }
-
-                        btn.addEventListener("click", toggleFullscreen);
-
-                        // Update button text if user exits fullscreen via browser controls
-                        function setFullscreenBtn(isFull) {
-                          if (isFull) {
-                            btn.title = "Exit Fullscreen";
-                            btn.querySelector('img').src = "TemplateData/fullscreen-button.png";
-                            btn.querySelector('img');
-                          } else {
-                            btn.title = "Enter Fullscreen";
-                            btn.querySelector('img').src = "TemplateData/fullscreen-button.png";
-                            btn.querySelector('img');
-                          }
-                        }
-
-                        document.addEventListener("fullscreenchange", () => {
-                          setFullscreenBtn(isFullscreen());
-                        });
-                        document.addEventListener("webkitfullscreenchange", () => {
-                          setFullscreenBtn(isFullscreen());
-                        });
-          });
-      };
-
-      document.body.appendChild(script);
-
-    </script>
-  </body>
 </html>

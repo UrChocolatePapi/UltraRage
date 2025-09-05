@@ -1,0 +1,16 @@
+{
+    "name": "Ultra Rage",
+    "short_name": "Ultra Rage",
+    "start_url": "index.html",
+    "display": "fullscreen",
+    "orientation": "landscape",
+    "background_color": "#31283C",
+    "theme_color": "#000",
+    "description": "Ultra Rage",
+    "icons": [{
+      "src": "TemplateData/icon.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }]
+  }
